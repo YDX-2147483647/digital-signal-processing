@@ -2,6 +2,11 @@
 
 2022年11月至2023年1月。
 
+```matlab
+>>> main  % 运行
+>>> main("Force", true)  % 运行，强制重新绘图
+```
+
 ## Background Data
 
 - 3 mm thickness.
