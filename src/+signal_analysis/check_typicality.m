@@ -2,6 +2,9 @@ function [f_std, f_all] = check_typicality(data, options)
 %check_typicality - 检查典型性
 %
 % [f_std, f_all] = check_typicality(data) 检查 data 不同位置的典型性，返回 figure
+% 
+% 输入：
+% - data(#x, #y, #time, #plate)：所有板的数据
 %
 % 选项：
 % - SamplingRate：采样率，Hz，默认 100 MHz。
