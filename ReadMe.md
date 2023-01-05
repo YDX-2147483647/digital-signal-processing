@@ -25,9 +25,9 @@
 Ultrasonic signals are **noisy** in nature due to the back scattering phenomenon produced by the inherent microstructure of the material. The first step is to extract a typical ultrasonic signal from each composite part under test, and to carry out detailed signal analysis in the time and frequency domains to identify key signal features such as **locations, magnitudes and frequencies** for ultrasonic echoes and noise.
 
 - Time domain analysis
-  - [ ] Program with comments to read, extract and plot ultrasonic signals
-  - [ ] Waveforms produced with correct scale
-  - [ ] Comments on the waveforms observed
+  - [x] Program with comments to read, extract and plot ultrasonic signals
+  - [x] Waveforms produced with correct scale
+  - [x] Comments on the waveforms observed
 - Frequency domain analysis
   - [ ] Program with comments to plot magnitude frequency spectrum
   - [ ] Spectrum produced with correct scale
