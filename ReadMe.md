@@ -3,6 +3,7 @@
 2022年11月至2023年1月。
 
 ```matlab
+>>> cd ./src/
 >>> main  % 运行
 >>> main("Force", true)  % 运行，强制重新绘图
 >>> test_all  % 测试
@@ -29,9 +30,9 @@ Ultrasonic signals are **noisy** in nature due to the back scattering phenomenon
   - [x] Waveforms produced with correct scale
   - [x] Comments on the waveforms observed
 - Frequency domain analysis
-  - [ ] Program with comments to plot magnitude frequency spectrum
-  - [ ] Spectrum produced with correct scale
-  - [ ] Comments on the spectrum observed for echo signal and noise
+  - [x] Program with comments to plot magnitude frequency spectrum
+  - [x] Spectrum produced with correct scale
+  - [x] Comments on the spectrum observed for echo signal and noise
 
 ### Noise reduction
 

@@ -7,6 +7,7 @@ arguments
 end
 
 import util.plot_time
+import util.plot_freq
 
 rng(42); % 为了容易复现，随便规定一下随机数种子
 
@@ -32,11 +33,11 @@ end
 
 % 1. Extract and plot ultrasonic signals
 
-the_typical = signal_analysis.extract_the_typical(data, "Method", "center");
+typical_time = signal_analysis.extract_the_typical(data, "Method", "center");
 
 if options.Force || ~all(isfile("../fig/time-center" + ["" "-detail"] + ".jpg"))
     figure;
-    plot_time(the_typical);
+    plot_time(typical_time);
     title("时域典型信号（center）");
     exportgraphics(gcf, "../fig/time-center.jpg");
 
@@ -54,6 +55,20 @@ if options.Force || ~all(isfile("../fig/time-" + ["random" "mean"] + ".jpg"))
         exportgraphics(gcf, "../fig/time-" + m + ".jpg");
     end
 
+end
+
+% 2. Plot magnitude frequency spectrum
+
+typical_freq = fft(typical_time); % 默认只变换首个维度（即 #time）
+
+if options.Force || ~all(isfile("../fig/freq-center" + ["" "-detail"] + ".jpg"))
+    figure;
+    plot_freq(abs(typical_freq)); % 只画幅度，忽略相位
+    title("典型信号（center）的幅度谱");
+    exportgraphics(gcf, "../fig/freq-center.jpg");
+
+    xlim([0 20]);
+    exportgraphics(gcf, "../fig/freq-center-detail.jpg");
 end
 
 end
