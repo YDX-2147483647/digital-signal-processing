@@ -18,7 +18,7 @@ function [f_std, f_all] = check_typicality(data, options)
 
 arguments
     data(:, :, :, :)
-    options.SamplingRate (1, 1) {mustBeNumeric, mustBePositive} = 100e6
+    options.SamplingRate (1, 1) {mustBePositive} = 100e6
     options.PlateNames (1, :) string = ["X" "Y"]
 end
 
