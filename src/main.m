@@ -12,13 +12,7 @@ import util.plot_freq
 rng(42); % 为了容易复现，随便规定一下随机数种子
 
 %% 读取数据
-
-% data(#x, #y, #time, #plate)
-data = cat( ...
-4, ...
-    load("../data/CompositeX.mat").CompositeX, ...
-    load("../data/CompositeY.mat").CompositeY ...
-);
+data = util.load_data();
 
 %% Signal Analysis
 fprintf("## Signal Analysis\n\n");
