@@ -1,0 +1,9 @@
+import noise_reduction.reduce_noise
+
+data = rand(13, 3);
+
+%% Shapes
+assert(isequal( ...
+    size(reduce_noise(data)), ...
+    size(data) ...
+));
