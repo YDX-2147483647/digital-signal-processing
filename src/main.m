@@ -65,4 +65,15 @@ if options.Force || ~all(isfile("../fig/freq-center" + ["" "-detail"] + ".jpg"))
     exportgraphics(gcf, "../fig/freq-center-detail.jpg");
 end
 
+%% Plan B
+fprintf("## Plan B\n\n");
+
+t = plan_B.time_cut(typical_time);
+
+if options.Force || ~all(isfile("../fig/Plan_B-time.jpg"))
+    figure;
+    plot_time(typical_time .* t);
+    exportgraphics(gcf, "../fig/Plan_B-time.jpg");
+end
+
 end

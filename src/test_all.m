@@ -1,1 +1,1 @@
-runtests signal_analysis
+runtests(["signal_analysis" "plan_B"])
