@@ -7,7 +7,7 @@ function plot_freq(data, options)
 % - data(#freq, #plate)：所有板要画的一维数据
 %
 % 选项：
-% - SamplingRate：采样率，Hz，默认 100 MHz。
+% - SamplingRate：采样率，Hz，默认 100 MHz
 % - PlateNames：板的名字，默认 X、Y。
 
 arguments

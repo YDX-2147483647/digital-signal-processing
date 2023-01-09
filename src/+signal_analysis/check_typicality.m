@@ -7,7 +7,7 @@ function [f_std, f_all] = check_typicality(data, options)
 % - data(#x, #y, #time, #plate)：所有板的数据
 %
 % 选项：
-% - SamplingRate：采样率，Hz，默认 100 MHz。
+% - SamplingRate：采样率，Hz，默认 100 MHz
 % - PlateNames：板的名字，默认 X、Y。
 %
 % 输出：
