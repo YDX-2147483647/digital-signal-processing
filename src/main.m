@@ -80,8 +80,8 @@ if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + [
         else
             a = 0.03e-6 * 100e6;
             kernel = exp(- (-5 * a:5 * a) .^ 2 / a ^ 2).';
-            kernel = kernel / sum(kernel);
             cut = conv2(t, kernel, "same");
+            cut = cut ./ max(cut);
         end
 
         s = typical_time .* cut;
@@ -144,8 +144,8 @@ if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' +
         else
             a = 0.6e6/100e6 * size(typical_freq, 1);
             kernel = exp(- (-5 * a:5 * a) .^ 2 / a ^ 2).';
-            kernel = kernel / sum(kernel);
             cut = conv2(t_control, kernel, "same");
+            cut = cut ./ max(cut);
         end
 
         s_freq = typical_freq .* cut;
