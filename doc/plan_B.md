@@ -114,3 +114,8 @@
 > 此表只考虑了集中程度，未考虑能量——由 Parseval 定理，无论在哪域能量都不变。比较不同信号时才需考虑能量。
 
 这样看来，一般滤波器是到频域相乘，反而是把信号、噪声搅一搅再处理，无甚好处；不如直接在时域处理。
+
+## References
+
+- [私有函数 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/matlab_prog/private-functions.html)
+- [结构体数组 - MATLAB - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/struct.html)

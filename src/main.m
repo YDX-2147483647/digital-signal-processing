@@ -68,6 +68,7 @@ end
 %% Plan B
 fprintf("## Plan B\n\n");
 
+fprintf("### Time cut\n\n");
 t = plan_B.time_cut(typical_time);
 
 if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut"] + ".jpg"), "all")
@@ -126,6 +127,73 @@ if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + [
         ylabel("噪声");
 
         exportgraphics(fig, "../fig/Plan_B-" + label + "-freq.jpg");
+    end
+
+end
+
+% 对照组
+fprintf("### Frequency cut (control group)\n\n");
+t_control = plan_B.freq_cut(typical_freq);
+
+if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut"] + ".jpg"), "all")
+
+    for label = ["cliff" "slope"]
+        %% cut
+        if label == "cliff"
+            cut = t;
+        else
+            a = 0.6e6/100e6 * size(typical_freq, 1);
+            kernel = exp(- (-5 * a:5 * a) .^ 2 / a ^ 2).';
+            kernel = kernel / sum(kernel);
+            cut = conv2(t, kernel, "same");
+        end
+
+        s_freq = typical_freq .* cut;
+        n_freq = typical_freq .* (1 - cut);
+        % imag ≈ 0 because of symmetry
+        s_time = real(ifft(s_freq));
+        n_time = real(ifft(n_freq));
+
+        fig = tiledlayout(2, 1);
+        title(fig, "对照组：切分情况（" + label + "）");
+
+        nexttile;
+        plot_time(real(ifft(cut)));
+        title("时域");
+
+        nexttile;
+        plot_freq(abs(cut), "Shift", true);
+        title("频域");
+        ylim([-0.2 1.2]);
+        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-cut.jpg");
+
+        %% time
+        fig = tiledlayout(2, 1);
+        title(fig, "对照组：频域裁切结果的时域序列（" + label + "）");
+
+        nexttile;
+        plot_time(s_time);
+        ylabel("信号");
+
+        nexttile;
+        plot_time(n_time);
+        ylabel("噪声");
+
+        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-time.jpg");
+
+        %% freq
+        fig = tiledlayout(2, 1);
+        title(fig, "对照组：频域裁切结果（" + label + "）");
+
+        nexttile;
+        plot_freq(abs(s_freq));
+        ylabel("信号");
+
+        nexttile;
+        plot_freq(abs(n_freq));
+        ylabel("噪声");
+
+        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-freq.jpg");
     end
 
 end
