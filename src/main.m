@@ -71,7 +71,7 @@ fprintf("## Plan B\n\n");
 fprintf("### Time cut\n\n");
 t = plan_B.time_cut(typical_time);
 
-if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut"] + ".jpg"), "all")
+if options.Force || ~all(isfile("../fig/Plan_B/" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut"] + ".jpg"), "all")
 
     for label = ["cliff" "slope"]
         %% cut
@@ -98,7 +98,7 @@ if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + [
         nexttile;
         plot_freq(abs(fft(cut)), "Shift", true);
         title("频域");
-        exportgraphics(fig, "../fig/Plan_B-" + label + "-cut.jpg");
+        exportgraphics(fig, "../fig/Plan_B/" + label + "-cut.jpg");
 
         %% time
         fig = tiledlayout(2, 1);
@@ -112,7 +112,7 @@ if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + [
         plot_time(n);
         ylabel("噪声");
 
-        exportgraphics(fig, "../fig/Plan_B-" + label + "-time.jpg");
+        exportgraphics(fig, "../fig/Plan_B/" + label + "-time.jpg");
 
         %% freq
         fig = tiledlayout(2, 1);
@@ -126,7 +126,7 @@ if options.Force || ~all(isfile("../fig/Plan_B-" + ["cliff" "slope"].' + "-" + [
         plot_freq(abs(fft(n)));
         ylabel("噪声");
 
-        exportgraphics(fig, "../fig/Plan_B-" + label + "-freq.jpg");
+        exportgraphics(fig, "../fig/Plan_B/" + label + "-freq.jpg");
     end
 
 end
@@ -135,7 +135,7 @@ end
 fprintf("### Frequency cut (control group)\n\n");
 t_control = plan_B.freq_cut(typical_freq);
 
-if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut"] + ".jpg"), "all")
+if options.Force || ~all(isfile("../fig/Plan_B/control-" + ["cliff" "slope"].' + "-" + ["time" "freq" "cut" "compare"] + ".jpg"), "all")
 
     for label = ["cliff" "slope"]
         %% cut
@@ -165,7 +165,7 @@ if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' +
         plot_freq(abs(cut), "Shift", true);
         title("频域");
         ylim([-0.2 1.2]);
-        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-cut.jpg");
+        exportgraphics(fig, "../fig/Plan_B/control-" + label + "-cut.jpg");
 
         %% time
         fig = tiledlayout(2, 1);
@@ -179,7 +179,7 @@ if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' +
         plot_time(n_time);
         ylabel("噪声");
 
-        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-time.jpg");
+        exportgraphics(fig, "../fig/Plan_B/control-" + label + "-time.jpg");
 
         %% freq
         fig = tiledlayout(2, 1);
@@ -193,7 +193,26 @@ if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' +
         plot_freq(abs(n_freq));
         ylabel("噪声");
 
-        exportgraphics(fig, "../fig/Plan_B_control-" + label + "-freq.jpg");
+        exportgraphics(fig, "../fig/Plan_B/control-" + label + "-freq.jpg");
+
+        %% compare
+        figure("WindowState", "maximized");
+        fig = tiledlayout(2, 1);
+        title(fig, "频域裁切（" + label + "）效果");
+
+        names = ["X" "Y"];
+
+        for p = 1:2
+            nexttile;
+            plot_time(typical_time(:, p), ".", "PlateNames", "原始");
+            hold on;
+            plot_time(s_time(:, p), "PlateNames", "处理后");
+            hold off;
+            legend(["原始" "处理后"]);
+            ylabel(names(p));
+        end
+
+        exportgraphics(fig, "../fig/Plan_B/control-" + label + "-compare.jpg");
     end
 
 end

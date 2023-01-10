@@ -115,6 +115,24 @@
 
 这样看来，一般滤波器是到频域相乘，反而是把信号、噪声搅一搅再处理，无甚好处；不如直接在时域处理。
 
+## 算法
+
+### 划分区域
+
+## 记录
+
+### 对照组
+
+先来看对照组：用带通滤波器去噪，在频域裁切。
+
+<figure>
+    <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
+        <img src="../fig/Plan_B/control-cliff-time.jpg">
+        <img src="../fig/Plan_B/control-cliff-freq.jpg">
+    </div>
+    <figcaption>？</figcaption>
+</figure>
+
 ## References
 
 - [私有函数 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/matlab_prog/private-functions.html)
