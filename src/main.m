@@ -70,10 +70,34 @@ fprintf("## Plan B\n\n");
 
 t = plan_B.time_cut(typical_time);
 
-if options.Force || ~all(isfile("../fig/Plan_B-time.jpg"))
-    figure;
+if options.Force || ~all(isfile("../fig/Plan_B-" + ["time" "freq"] + ".jpg"))
+    %% time
+    fig = tiledlayout(2, 1);
+    title(fig, "时域裁切结果");
+
+    nexttile;
     plot_time(typical_time .* t);
-    exportgraphics(gcf, "../fig/Plan_B-time.jpg");
+    ylabel("信号");
+
+    nexttile;
+    plot_time(typical_time .* (1 - t));
+    ylabel("噪声");
+
+    exportgraphics(fig, "../fig/Plan_B-time.jpg");
+
+    %% freq
+    fig = tiledlayout(2, 1);
+    title(fig, "时域裁切结果的幅度谱");
+
+    nexttile;
+    plot_freq(abs(fft(typical_time .* t)));
+    ylabel("信号");
+
+    nexttile;
+    plot_freq(abs(fft(typical_time .* (1 - t))));
+    ylabel("噪声");
+
+    exportgraphics(fig, "../fig/Plan_B-freq.jpg");
 end
 
 end
