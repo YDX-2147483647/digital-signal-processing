@@ -5,7 +5,7 @@ function t = time_cut(data, options)
 % - data(#time, #slice)：所有样本的数据
 %
 % 选项：
-% - MinMagnitude；可判为信号的最小振幅，相对最大振幅而言，默认 0.1
+% - MinMagnitude；可判为信号的最小振幅，相对最大振幅而言，默认 0.2
 % - SamplingRate：采样率，Hz，默认 100 MHz
 % - DurationEstimated：估计信号持续时间，默认为 0.3 μs
 %
