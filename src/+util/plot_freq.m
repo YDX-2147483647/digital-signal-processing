@@ -27,6 +27,10 @@ f_MHz = (0:n_freq - 1) / n_freq * options.SamplingRate / 1e6;
 if options.Shift
     half_freq = round(n_freq / 2);
     f_MHz(half_freq:end) = f_MHz(half_freq:end) - options.SamplingRate / 1e6;
+
+    % Circular shift，不然会有从右边缘飞向左边缘的线
+    f_MHz = circshift(f_MHz, 1 - half_freq);
+    data = circshift(data, 1 - half_freq);
 end
 
 plot(f_MHz, data);
