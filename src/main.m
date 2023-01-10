@@ -140,12 +140,12 @@ if options.Force || ~all(isfile("../fig/Plan_B_control-" + ["cliff" "slope"].' +
     for label = ["cliff" "slope"]
         %% cut
         if label == "cliff"
-            cut = t;
+            cut = t_control;
         else
             a = 0.6e6/100e6 * size(typical_freq, 1);
             kernel = exp(- (-5 * a:5 * a) .^ 2 / a ^ 2).';
             kernel = kernel / sum(kernel);
-            cut = conv2(t, kernel, "same");
+            cut = conv2(t_control, kernel, "same");
         end
 
         s_freq = typical_freq .* cut;
