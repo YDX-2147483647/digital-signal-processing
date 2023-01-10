@@ -26,7 +26,7 @@ end
 max_overall = max(abs(data));
 
 % 2. 大于“最大振幅” × MinMagnitude 的，初步判断为信号
-t = double(data > max_overall * options.MinMagnitude);
+t = double(abs(data) > max_overall * options.MinMagnitude);
 
 % 3. 将孤立的信号修正为噪声，将连片信号夹杂的噪声修正为信号
 % 这里会抑制开头结尾，不过没关系，反正那里没信号。
