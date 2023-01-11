@@ -1,5 +1,5 @@
 function t = time_cut(data, options)
-%time_cut - 在时域切分为数据和噪声
+%time_cut - 在时域切分为信号和噪声
 %
 % 输入：
 % - data(#time, #slice)：所有样本的数据

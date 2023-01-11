@@ -23,7 +23,7 @@ y = conv2(x, ones([options.WindowLength 1]), 'same');
 y = double(y > 1);
 % 反向扩散
 y = conv2(1 - y, ones([options.WindowLength - 2 1]), 'same');
-% logical or, then logical and
+% logical and, then logical not
 y = double(y < 1);
 
 end

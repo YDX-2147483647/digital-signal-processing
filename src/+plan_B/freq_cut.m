@@ -1,5 +1,5 @@
 function t = freq_cut(data, options)
-%freq_cut - 在时域切分为数据和噪声
+%freq_cut - 在频域切分为信号和噪声
 %
 % 输入：
 % - data(#freq, #slice)：所有样本的数据
