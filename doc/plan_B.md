@@ -217,7 +217,7 @@
     和刚才一样，每个 slice 分别处理，第二维只是为了方便向量化。
 
 - **选项**
-    
+  
     - `WindowLength`：窗长，最好是奇数。
     
       `connect_and_drop`不涉及物理情景，直接用点数指定窗长。
@@ -279,20 +279,41 @@
 
   反转 0、1 抵消前一步，其余同 2.。
 
+### 过渡带
+
+这里过渡带采用高斯函数（严格来说是误差函数），通带、阻带仍完全水平。（注意这并非高斯窗，由于程序实现，高斯窗更麻烦。）
+
+1. 由截止频率，制备**矩形窗**`t`。
+
+2. 将`t`与高斯核**卷积**。
+
+   ```matlab
+   kernel = exp(- (-5 * a:5 * a) .^ 2 / a ^ 2).';  % exp(-25) ≈ 0
+   cut = conv2(t, kernel, "same");
+   ```
+
+   其中`a`是高斯核的半径，远小于带宽。
+
+3. **归一化**，保证通带零增益（恒取 1）。
+
+   ```matlab
+   cut = cut ./ max(cut);
+   ```
+
 ## 记录
 
-### 对照组
+### 对照组：带通滤波
 
 先来看对照组：用带通滤波器去噪，在频域裁切，选出频率。
 
-实际滤波器的频率响应通带不平、阻带衰减有限。这里先用理想*矩形*频率响应（记作 cliff）试验。如下图，根据第一步 signal analysis 得出的频谱（左半图），用前述算法确定滤波器的上下截止频率，进而给出滤波器的特性（右半图）。
+实际滤波器的频率响应通带不平、阻带衰减有限。这里先用理想*矩形*频率响应（记作 cliff）试验。如下图，根据第一步 signal analysis 得出的频谱（左半图），用前述`freq_cut`确定滤波器的上下截止频率，进而给出滤波器的特性（右半图）。
 
 <figure>
     <div style='display: grid; grid-template-columns: 1fr 2fr; gap: 1em;'>
         <img src="../fig/freq-center.jpg">
         <img src="../fig/Plan_B/control-cliff-cut.jpg">
     </div>
-    <figcaption>频域切分情况<br>左：数据的频谱；右：滤波器的单位冲激响应（上）和幅频响应（下）。</figcaption>
+    <figcaption>频域切分情况（cliff）<br>左：数据的频谱；右：滤波器的单位冲激响应（上）和幅频响应（下）。</figcaption>
 </figure>
 
 > 为最后公平比较，X、Y 最好采用相同滤波器。这里只是试验，仅用两份样本示意，先略去后续步骤。
@@ -301,28 +322,29 @@
 
 <figure>
     <img src="../fig/Plan_B/control-cliff-freq.jpg" style='max-width: 60%;'>
-    <figcaption>频域裁切结果<br>上：信号；下：噪声。</figcaption>
+    <figcaption>频域裁切结果（cliff）<br>上：信号；下：噪声。</figcaption>
 </figure>
 
 还原到时域如下。
 
 <figure>
     <img src="../fig/Plan_B/control-cliff-time.jpg">
-    <figcaption>频域裁切结果的时域序列<br>上：信号；下：噪声。</figcaption>
+    <figcaption>频域裁切结果的时域序列（cliff）<br>上：信号；下：噪声。</figcaption>
 </figure>
 
 <figure>
     <img src="../fig/Plan_B/control-cliff-compare.jpg">
-    <figcaption>频域裁切效果<br>实线：处理后的信号；点：原始数据。<br>上：X；下：Y。</figcaption>
+    <figcaption>频域裁切效果（cliff）<br>实线：处理后的信号；点：原始数据。<br>上：X；下：Y。</figcaption>
 </figure>
 
 - 频域切得干干净净。
+- 时域有些信号被当作了噪声，这部分信号约是正确判定部分的 30%（按幅度计算），并且不是某些时刻的偶发现象。
 - 在回波以外的时间，抑制了噪声，但不同频率的噪声抑制程度不同，与信号同频的噪声没被抑制。
 - 两次回波时间上，数据几乎没变化，主要是更平滑，有峰值降低、持续时间变长的轻微趋势。
 
 以上 cliff 滤波器完全没有过渡带。若引入过渡带（记作 slope，如下图），可能抑制回波持续时间变长的趋势。
 
-> 过渡带是高斯式，半径从带宽的 1/20 试到 1/2，最终效果都差不多。以下是按 1/10 画的。
+> 过渡带高斯核的半径从带宽的 1/20 试到 1/2，最终效果都差不多。以下是按 1/10 画的。
 
 <figure>
     <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
@@ -341,6 +363,59 @@
     </div>
     <figcaption>频域裁切在时域的效果（slope）<br>图象意义同 cliff。</figcaption>
 </figure>
+
+### 实验组：时域裁切
+
+现在来看时域裁切。
+
+首先用`time_cut`确定截止时刻，分出“回波部分”和“其它部分”。
+
+<figure>
+    <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
+        <img src="../fig/Plan_B/cliff-cut.jpg">
+        <img src="../fig/Plan_B/slope-cut.jpg">
+    </div>
+    <figcaption>时域切分情况<br>左：cliff；右：slope。</figcaption>
+</figure>
+
+> 第二行是频域的幅度谱。
+>
+> 时域相乘对应频域*卷积*，不再是频域*相乘*，故不能看作频率响应。
+>
+> cliff 搬移频率后便是信号。
+
+上图中左边是矩形窗（cliff），右边在此基础上加了过渡带（slope）。可以看到，时域取窗会导致频谱扩散（卷积有一定宽度的序列），slope 稍微抑制了这种扩散作用（加快该序列的衰减）。
+
+<figure>
+    <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
+        <img src="../fig/Plan_B/cliff-time.jpg">
+        <img src="../fig/Plan_B/slope-time.jpg">
+    </div>
+    <figcaption>时域裁切结果<br>左：cliff；右：slope。<br>上：信号；下：噪声。</figcaption>
+</figure>
+
+- `time_cut`比较准确地切在信号边缘。
+- cliff、slope 效果相近。
+- 噪声部分虽也存在约 30% 的突出，但不同于对照组，实验组的突出并不持续，更可能是偶然现象。
+- 回波以外部分，所有频率的噪声都被消除了。
+- 回波部分，完全没抑制任何噪声，信号部分不如对照组平滑。
+
+下面再在频域验证一下。
+
+<figure>
+    <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
+        <img src="../fig/Plan_B/cliff-freq.jpg">
+        <img src="../fig/Plan_B/slope-freq.jpg">
+    </div>
+    <figcaption>时域裁切结果的幅度谱<br>左：cliff；右：slope。<br>上：信号；下：噪声。</figcaption>
+</figure>
+
+- 信号部分很纯净，非常符合 signal analysis 一步分析的若干特征。
+- 噪声部分抛开直流分量，几乎是白噪声。在信号主峰对应部分也有起伏，也是正确判定信号的约 30%（按幅度计算），但噪声在其它频率也有 20%，因此比对照组更可能是偶发现象。
+
+## 小结
+
+就信号、噪声分离而言，简单的时域裁切效果就不差。与对照组（带通滤波）相比，时域裁切在频域分离更纯净，在时域回波部分的效果略逊于对照组，在交界处、其它部分则远胜于对照组。
 
 ## References
 
