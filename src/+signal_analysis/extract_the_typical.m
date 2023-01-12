@@ -5,7 +5,7 @@ function s = extract_the_typical(data, options)
 %
 % 输入：
 % - data(#x, #y, #time, #plate)：所有板的数据
-% 
+%
 % 选项：
 % - Method：取样方法。
 %   - center：取中心
@@ -17,7 +17,7 @@ function s = extract_the_typical(data, options)
 
 arguments
     data(:, :, :, :)
-    options.Method (1, 1) string {mustBeMember(options.Method, ["mean", "center", "random"])}
+    options.Method (1, 1) string {mustBeMember(options.Method, ["mean", "center", "random"])} = "center"
 end
 
 if options.Method == "mean"
