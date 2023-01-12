@@ -217,4 +217,46 @@ if options.Force || ~all(isfile("../fig/Plan_B/control-" + ["cliff" "slope"].' +
 
 end
 
+%% Noise Reduction
+fprintf("## Noise Reduction\n\n");
+% todo
+
+reducer = designfilt( ...
+    'bandpassfir', ...
+    'SampleRate', 100, ...
+    'StopbandFrequency1', 2, 'StopbandAttenuation1', 13, ...
+    'PassbandFrequency1', 3, 'PassbandFrequency2', 8, 'PassbandRipple', 1, ...
+    'StopbandFrequency2', 15, 'StopbandAttenuation2', 13, ...
+    'DesignMethod', 'equiripple' ...
+);
+
+if options.Force || ~isfile("../fig/noise_reduction-reducer.jpg")
+    f = fvtool(reducer);
+    f.MagnitudeDisplay = "Magnitude";
+
+    title("滤波器幅频响应");
+    xlabel("$f$ / MHz", "Interpreter", "latex");
+    ylabel("幅度 / dB");
+
+    f.Position = [1 1 1280 540]; % 不然横轴标签会溢出
+    exportgraphics(gcf, "../fig/noise_reduction-reducer.jpg");
+end
+
+typical_reduced_time = filter(reducer, typical_time);
+
+if options.Force || ~isfile("../fig/noise_reduction-result.jpg")
+    fig = figure;
+
+    subplot(2, 1, 1);
+    plot_time(typical_time);
+    ylabel("原始");
+
+    subplot(2, 1, 2);
+    plot_time(typical_reduced_time);
+    ylabel("处理后");
+
+    title("滤波去噪结果");
+    exportgraphics(fig, "../fig/noise_reduction-result.jpg");
+end
+
 end
