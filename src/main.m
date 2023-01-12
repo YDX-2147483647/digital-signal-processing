@@ -259,4 +259,48 @@ if options.Force || ~isfile("../fig/noise_reduction-result.jpg")
     exportgraphics(fig, "../fig/noise_reduction-result.jpg");
 end
 
+typical_time = typical_reduced_time;
+
+%% Attenuation Estimation
+fprintf("## Attenuation Estimation\n\n");
+
+t = plan_B.time_cut(typical_time);
+peaks = attenuation_estimation.get_peaks(typical_time, t);
+
+if options.Force || ~isfile("../fig/peaks.jpg")
+    fig = tiledlayout(2, 1);
+    title(fig, "峰值检测");
+
+    names = ["X" "Y"];
+
+    for p = 1:2
+        nexttile;
+
+        plot_time(typical_time(:, p), "PlateNames", "处理后信号");
+        ylabel(names(p));
+        ylim(1.2 * [-1 1] * peaks(1, p));
+        legend off;
+
+        hold on;
+
+        yline(peaks(1, p), '-', "front wall", "Color", "#77AC30", "LabelVerticalAlignment", "middle");
+        yline(-peaks(1, p), "Color", "#77AC30", "LabelVerticalAlignment", "middle");
+
+        yline(peaks(2, p), '--', "back wall", "Color", "#7E2F8E", "LabelVerticalAlignment", "middle");
+        yline(-peaks(2, p), '--', "Color", "#7E2F8E", "LabelVerticalAlignment", "middle");
+        
+        ax = gca;
+        x = [0 1 1 0] * ax.XLim(2);
+
+        y = [-1 -1 1 1] * peaks(1, p);
+        fill(x, y, "-", "FaceColor", "#77AC30", "FaceAlpha", 0.1, "EdgeColor", "none");
+        y = [-1 -1 1 1] * peaks(2, p);
+        fill(x, y, "-", "FaceColor", "#7E2F8E", "FaceAlpha", 0.2, "EdgeColor", "none");
+
+        hold off;
+    end
+
+    exportgraphics(fig, "../fig/peaks.jpg")
+end
+
 end

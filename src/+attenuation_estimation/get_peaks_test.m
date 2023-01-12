@@ -1,0 +1,19 @@
+import attenuation_estimation.get_peaks
+
+%% Shapes
+data = rand(13, 3);
+t = zeros(13, 3);
+t(3, :) = 1;
+t(10, :) = 1;
+assert(isequal( ...
+    size(get_peaks(data, t)), ...
+    [2 size(data, 2)] ...
+));
+
+%% Two peaks
+data = [0 1 2 -3 0 0 1 5 3 0].';
+t = [0 1 1 1 0 0 1 1 1 0].';
+assert(isequal( ...
+    get_peaks(data, t), ...
+    [3 5].' ...
+));
