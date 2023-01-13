@@ -9,6 +9,9 @@
 % 针对一个典型信号
 >>> main_typical  % 运行
 >>> main_typical("Force", true)  % 运行，强制重新绘图
+
+% 针对全部数据
+>>> main  % 运行
 ```
 
 ## Background Data

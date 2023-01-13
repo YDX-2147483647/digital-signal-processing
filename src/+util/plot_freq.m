@@ -1,5 +1,5 @@
 function plot_freq(data, LineSpec, options)
-%plot_freq - 以时间为横轴 plot
+%plot_freq - 以频率为横轴 plot
 %
 % plot_freq(data)
 %
@@ -21,8 +21,11 @@ arguments
 end
 
 n_plate = size(data, 2);
-assert(length(options.PlateNames) == n_plate);
 n_freq = size(data, 1);
+
+if length(options.PlateNames) ~= n_plate
+    warning("有 %d 块板，却提供了 %d 个名字。", n_plate, length(options.PlateNames));
+end
 
 f_MHz = (0:n_freq - 1) / n_freq * options.SamplingRate / 1e6;
 
