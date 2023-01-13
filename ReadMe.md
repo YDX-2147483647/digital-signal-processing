@@ -54,9 +54,9 @@ With the ultrasonic measurement operating at a particular frequency band, the se
 
 The ~~fourth~~ third step is to estimate the **attenuation of the back wall echo with respect to the front wall echo**. This involves application of the filter developed in the second step to the whole ultrasonic record of each composite plate, extraction of the **two peak values** from the front wall and back wall echoes in each ultrasonic signal, and calculation of the echo attenuation at each ultrasonic measurement point. The results should lead to two echo attenuation images for comparative visualisation of two composite plates. 
 
-- [ ] Program with comments to filter all signals and generate attenuation image
-- [ ] Illustration of echo peaks extracted and attenuation estimated
-- [ ] Attenuation images of two different composite plates
+- [x] Program with comments to filter all signals and generate attenuation image
+- [x] Illustration of echo peaks extracted and attenuation estimated
+- [x] Attenuation images of two different composite plates
 - [ ] Comments on attenuation images observed
 
 ### Part sentencing
@@ -64,6 +64,6 @@ The ~~fourth~~ third step is to estimate the **attenuation of the back wall echo
 The final step is to show the two distributions of the echo attenuation values obtained from the third step, to compute basic statistics for the two distributions, and to use the results to determine which composite plate has the stronger mechanical strength overall.
 
 - [ ] Program with comments for statistical analysis of ultrasonic attenuation
-- [ ] Ultrasonic attenuation histograms
+- [x] Ultrasonic attenuation histograms
 - [ ] Statistics derived from ultrasonic attenuation histograms
 - [ ] Mechanically stronger composite plate identified with justification

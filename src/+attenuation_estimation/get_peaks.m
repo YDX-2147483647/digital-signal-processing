@@ -21,11 +21,18 @@ t = diff(cat(1, zeros(1, n_slice), t, zeros(1, n_slice)));
 peaks = zeros(2, n_slice);
 
 for s = 1:n_slice
-    starts = find(t(:, s) == 1, 2);
-    ends = find(t(:, s) == -1, 2) - 1;
+    starts = find(t(:, s) == 1);
+    ends = find(t(:, s) == -1) - 1;
 
     for p = 1:2
-        peaks(p, s) = max(abs(data(starts(p):ends(p), s)));
+
+        if p == 1
+            range_ = starts(1):ends(1);
+        else
+            range_ = starts(end):ends(end);
+        end
+
+        peaks(p, s) = max(abs(data(range_, s)));
     end
 
 end
