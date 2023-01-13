@@ -13,7 +13,7 @@ function t = time_cut(data, options)
 % - t(#time, #slice)：每一点的类型判断结果，1表示信号，0表示噪声
 %
 % 各样本会分别处理。
-% 
+%
 % 如果某些样本检出的回波次数不是2，会发出警告。
 
 arguments
@@ -32,8 +32,12 @@ t = double(abs(data) > max_overall * options.MinMagnitude);
 
 % 3. 将孤立的信号修正为噪声，将连片信号夹杂的噪声修正为信号
 % 这里会抑制开头结尾，不过没关系，反正那里没信号。
-window_length = round(options.DurationEstimated * options.SamplingRate / 2) * 2 - 1;
-t = connect_and_drop(t, "WindowLength", window_length);
+window_length = options.DurationEstimated * options.SamplingRate;
+t = connect_and_drop( ...
+    t, ...
+    "MaxGap", round(window_length / 2) * 2 - 1, ...
+    "MinDuration", round(window_length / 4) * 2 - 1 ...
+);
 
 %% Check
 

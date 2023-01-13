@@ -161,8 +161,12 @@
    `DurationEstimated * SamplingRate`是估计信号持续*点数*，`window_length`取一与它接近的奇数。
 
    ```matlab
-   window_length = round(DurationEstimated * SamplingRate / 2) * 2 - 1;
-   t = connect_and_drop(t, "WindowLength", window_length);
+   window_length = options.DurationEstimated * options.SamplingRate;
+   t = connect_and_drop( ...
+       t, ...
+       "MaxGap", round(window_length / 2) * 2 - 1, ...
+       "MinDuration", round(window_length / 4) * 2 - 1 ...
+   );
    ```
 
    这一步会在之后进一步解释。
@@ -222,9 +226,10 @@
 
 - **选项**
   
-    - `WindowLength`：窗长，最好是奇数。
+    - `MaxGap`：可以忽略的连续0最大长度，最好是奇数。
+    - `MinDuration`：可以忽略的连续1最大长度，最好是奇数。
     
-      `connect_and_drop`不涉及物理情景，直接用点数指定窗长。
+    `connect_and_drop`不涉及物理情景，直接用点数指定窗长。
     
 - **输出**`y(#time或#freq, #slice)`：同`x`，只是修正了误判。
 
@@ -232,56 +237,72 @@
 
 1. **扩散**
 
-  ```matlab
-  y = conv2(x, ones([WindowLength 1]), 'same');
-  ```
+   ```matlab
+   y = conv2(x, ones(MaxGap, 1), 'same');
+   ```
 
-  每个 1 向外“扩散”。
+   每个 1 向外“扩散”。
 
-  - 相邻点两边的 1 会覆盖中间的 0。
-    $$
-    \begin{array}{clcccrc}
-    &   \cdots & 1 & \color{red}0 & 1 & \cdots \\
-    &        ↙ & ↓ &     ↘\,↙     & ↓ & ↘ \\
-    \cdots & 3 & 2 &  \boxed{2}   & 2 & 3 & \cdots \\
-    \end{array}
-    $$
+   - 相邻点两边的 1 会覆盖中间的 0。
 
-    > 以上窗长为 3。
+     $$
+     \begin{array}{clcccrc}
+     &   \cdots & 1 & \color{red}0 & 1 & \cdots \\
+     &        ↙ & ↓ &     ↘\,↙     & ↓ & ↘ \\
+     \cdots & 3 & 2 &  \boxed{2}   & 2 & 3 & \cdots \\
+     \end{array}
+     $$
 
-  - 孤立点也会扩散，要等到之后才除掉。
+     > 以上窗长为 3。
 
-2. **logical or**
+   - 孤立点也会扩散，要等到之后才除掉。
 
-  ```matlab
-  y = double(y > 1);
-  ```
+2. **≈ logical or**
 
-  - 相邻点两边的 1 还是 1，中间的 0 则修正为 1 了。
-  - 孤立点变成了一小串 1。
+   ```matlab
+   y = double(y > 1);
+   ```
 
-  这两步下来，相当于对每个窗内的数据进行逻辑或。例如前面以 0 为中心的窗取到 1 0 1，逻辑或得 1。
+   - 相邻点两边的 1 还是 1，中间的 0 则修正为 1 了。
+   - 孤立点变成了一小串 1。
+
+   这两步下来，相当于对每个窗内的数据进行逻辑或。例如前面以 0 为中心的窗取到 1 0 1，逻辑或得 1。
 
 3. **反向扩散**
 
-  首先 0、1 互换，`1 - y`。然后像刚才一样卷积。
+   首先 0、1 互换，`1 - y`。然后像刚才一样卷积。
 
-  ```matlab
-  y = conv2(1 - y, ones([WindowLength - 2 1]), 'same');
-  ```
+   ```matlab
+   y = conv2(1 - y, ones(MaxGap - 2, 1), 'same');
+   ```
 
-  原有 1 的边缘向内收缩。
+   原有 1 的边缘向内收缩。
 
-  - 相邻点内部不受影响。
-  - 孤立点会收缩消失。（之前在 1. 扩散部分会抵消）
+   - 相邻点内部不受影响。
+   - 孤立点会收缩。若原来只有一点，则完全消失；不然只是抵消在 1. 扩散部分。
 
-4. **logical and, then logical not**
+4. **≈ logical and, then logical not**
 
-  ```matlab
-  y = double(y < 1);
-  ```
+   ```matlab
+   y = double(y < 1);
+   ```
 
-  反转 0、1 抵消前一步，其余同 2.。
+   反转 0、1 抵消前一步，其余同 2.。
+
+至此实现了“连接相邻点”。“丢弃孤立点”再反着来一遍即可。
+
+```matlab
+%% 丢弃孤立点
+% 反向扩散
+y = conv2(1 - y, ones(MinDuration, 1), 'same');
+% ≈ logical and, then logical not
+y = double(y <= 1);
+
+% 扩散
+y = conv2(y, ones(MinDuration - 2, 1), 'same');
+% ≈ logical or
+y = double(y >= 1);
+```
 
 ### 过渡带
 

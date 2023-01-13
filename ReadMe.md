@@ -4,9 +4,11 @@
 
 ```matlab
 >>> cd ./src/
->>> main  % 运行
->>> main("Force", true)  % 运行，强制重新绘图
 >>> test_all  % 测试
+
+% 针对一个典型信号
+>>> main_typical  % 运行
+>>> main_typical("Force", true)  % 运行，强制重新绘图
 ```
 
 ## Background Data

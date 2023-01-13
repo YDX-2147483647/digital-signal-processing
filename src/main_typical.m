@@ -1,4 +1,4 @@
-function main(options)
+function main_typical(options)
 % 选项：
 % - Force：是否强制重新绘图，默认不强制
 

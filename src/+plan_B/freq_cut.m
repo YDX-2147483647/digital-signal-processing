@@ -31,7 +31,11 @@ t = double(abs(data) > max_overall * options.MinMagnitude);
 % 3. 将孤立的信号修正为噪声，将连片信号夹杂的噪声修正为信号
 % 这里会抑制开头结尾，不过没关系，反正那里没信号。
 n_freq = size(data, 1);
-window_length = round(options.BandWidthEstimated / options.SamplingRate * n_freq / 2) * 2 - 1;
-t = connect_and_drop(t, "WindowLength", window_length);
+window_length = options.BandWidthEstimated / options.SamplingRate * n_freq;
+t = connect_and_drop( ...
+    t, ...
+    "MaxGap", round(window_length / 2) * 2 - 1, ...
+    "MinDuration", round(window_length / 4) * 2 - 1 ...
+);
 
 end
