@@ -63,7 +63,8 @@ The ~~fourth~~ third step is to estimate the **attenuation of the back wall echo
 
 The final step is to show the two distributions of the echo attenuation values obtained from the third step, to compute basic statistics for the two distributions, and to use the results to determine which composite plate has the stronger mechanical strength overall.
 
-- [ ] Program with comments for statistical analysis of ultrasonic attenuation
+- [x] Program with comments for statistical analysis of ultrasonic attenuation
 - [x] Ultrasonic attenuation histograms
-- [ ] Statistics derived from ultrasonic attenuation histograms
+- [x] Statistics derived from ultrasonic attenuation histograms
 - [ ] Mechanically stronger composite plate identified with justification
+

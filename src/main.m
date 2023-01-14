@@ -92,3 +92,14 @@ if ~isfile("../fig/attenuation_box.jpg")
 
     exportgraphics(gcf, "../fig/attenuation_box.jpg");
 end
+
+%% Part sentencing
+% (#x, #y, #plate)
+% → (#space, #plate)
+ratios = reshape(ratios, [], n_plate);
+stat = table( ...
+    mean(ratios).', std(ratios).', ...
+    'VariableNames', ["均值" "标准差"], ...
+    'RowNames', ["X" "Y"] ...
+);
+disp(stat);
