@@ -1,5 +1,5 @@
 function plot_cut(data, slices, options)
-%plot_cut - 展示切割情况
+%plot_cut - 展示切分情况
 %
 % 输入：
 % - data(#time, #slice)：所有样本的数据

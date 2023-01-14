@@ -14,6 +14,43 @@
 >>> main  % 运行
 ```
 
+## 文件结构
+
+- `asset/`：截图等附件
+
+- `data/`：数据
+
+- `doc/`：文档，documentation
+
+- `fig/`：图象，figures
+
+  可由`src/`中程序生成。
+
+- `src/`：源代码，sources
+  - `main.m`、`main_typical.m`：程序入口
+  - `test_all.m`：测试入口
+  - `+util/`：utilities
+    - `load_data.m`：读取数据
+    - `plot_freq.m`：以频率为横轴`plot`
+    - `plot_time.m`：以时间为横轴`plot`
+    - `plot_cut.m`：展示切分情况
+    - `plot_space.m`：以空间为横纵轴`pcolor`
+  - `+signal_analysis/`：分析信号
+    - `check_typicality.m`：检查典型性
+    - `extract_the_typical.m`：提取一个典型信号
+    - `extract_the_typical_test.m`（测试）
+  - `+noise_reduction/`：抑制噪声
+    - `prepare_filter.m`：制备数字滤波器（deprecated）
+    - `prepare_reducer.m`：制备数字滤波器
+  - `+plan_B/`
+    - `private/connect_and_drop.m`：连接相邻点，丢弃孤立点
+    - `freq_cut.m`：在频域切分为信号和噪声
+    - `time_cut.m`：在时域切分为信号和噪声
+    - `cut_test.m`（测试）
+  - `+attenuation_estimation/`：估计衰减
+    - `get_peaks.m`：提取峰值
+    - `get_peaks_test.m`（测试）
+
 ## Background Data
 
 - 3 mm thickness.

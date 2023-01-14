@@ -1,5 +1,5 @@
 function h = prepare_filter(tau, options)
-%prepare_filter - 制备数字滤波器
+%prepare_filter - 制备数字滤波器（deprecated）
 %
 % 输入：
 % - tau：滤波器的时延；阶数（`length(h)`）等于 2τ + 1

@@ -219,16 +219,8 @@ end
 
 %% Noise Reduction
 fprintf("## Noise Reduction\n\n");
-% todo
 
-reducer = designfilt( ...
-    'bandpassfir', ...
-    'SampleRate', 100, ...
-    'StopbandFrequency1', 2, 'StopbandAttenuation1', 13, ...
-    'PassbandFrequency1', 3, 'PassbandFrequency2', 8, 'PassbandRipple', 1, ...
-    'StopbandFrequency2', 15, 'StopbandAttenuation2', 13, ...
-    'DesignMethod', 'equiripple' ...
-);
+reducer = noise_reduction.prepare_reducer();
 
 if options.Force || ~isfile("../fig/noise_reduction-reducer.jpg")
     f = fvtool(reducer);
@@ -288,7 +280,7 @@ if options.Force || ~isfile("../fig/peaks.jpg")
 
         yline(peaks(2, p), '--', "back wall", "Color", "#7E2F8E", "LabelVerticalAlignment", "middle");
         yline(-peaks(2, p), '--', "Color", "#7E2F8E", "LabelVerticalAlignment", "middle");
-        
+
         ax = gca;
         x = [0 1 1 0] * ax.XLim(2);
 
