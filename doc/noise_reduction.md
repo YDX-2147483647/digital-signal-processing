@@ -8,6 +8,12 @@
 
 > 注意还有一步时延！
 
+<!-- todo -->
+
+![](../fig/noise_reduction-reducer.jpg)
+
+![](../fig/noise_reduction-result.jpg)
+
 ## References
 
 - [Cutoff Filters - Music Production Knowledge](https://musicproductionknowledge.com/knowledge/spectral-effects/cutoff-filters)
