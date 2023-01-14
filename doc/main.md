@@ -373,7 +373,7 @@ center 有整体变形，random 结果难以复现，故后面还是采用 cente
 
 ### d 频域分析
 
-<figure>
+<figure style='break-inside: avoid-page;'>
     <div style='display: grid; grid-template-columns: 3fr 2fr; gap: 1em;'>
         <img src="../fig/freq-center.jpg">
         <img src="../fig/freq-center-detail.jpg">
