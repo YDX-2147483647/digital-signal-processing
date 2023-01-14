@@ -18,6 +18,8 @@ $$
   - 而同一帧中，（不同位置）回波的标准差平均只有 5.78，占 0.6%。
 ```
 
+以上是[旧程序](https://github.com/YDX-2147483647/digital-signal-processing/blob/89a58f5f1ec4f5e5e602dcd3dea6e52ae2b44a37/src/+signal_analysis/check_typicality.m)的输出，有误，特别是百分比号应删去。
+
 ![](../fig/check_typicality-std.jpg)
 
 ![](../fig/check_typicality-all.jpg)

@@ -7,8 +7,8 @@ function s = extract_the_typical(data, options)
 % - data(#x, #y, #time, #plate)：所有板的数据
 %
 % 选项：
-% - Method：取样方法。
-%   - center：取中心
+% - Method：取样方法
+%   - center：取中心（默认）
 %   - mean：取空间的算术平均
 %   - random：随机取一点，所有板都取同一位置
 %

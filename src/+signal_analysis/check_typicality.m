@@ -42,9 +42,9 @@ for p = 1:n_plate
     all_std = std(data, 0, 'all');
 
     %% Print
-    fprintf("  - 回波的整体的标准差是 %.2f。（所有帧、所有位置）\n", all_std);
-    fprintf("  - 而同一帧中，（不同位置）回波的标准差平均只有 %.2f，占 %.1f%%。\n", ...
-        mean(spatial_std), mean(spatial_std) / all_std);
+    fprintf("  - 数据的整体的标准差是 %.2f。（所有帧、所有位置）\n", all_std);
+    fprintf("  - 而同一帧中，（不同位置）数据的标准差平均只有 %.2f，占 %.1f%%。\n", ...
+        mean(spatial_std), mean(spatial_std) / all_std * 100);
 
     %% Plot
     figure(f_std);
