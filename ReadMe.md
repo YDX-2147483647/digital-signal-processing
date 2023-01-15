@@ -94,7 +94,7 @@ The ~~fourth~~ third step is to estimate the **attenuation of the back wall echo
 - [x] Program with comments to filter all signals and generate attenuation image
 - [x] Illustration of echo peaks extracted and attenuation estimated
 - [x] Attenuation images of two different composite plates
-- [ ] Comments on attenuation images observed
+- [x] Comments on attenuation images observed
 
 ### Part sentencing
 
@@ -103,5 +103,5 @@ The final step is to show the two distributions of the echo attenuation values o
 - [x] Program with comments for statistical analysis of ultrasonic attenuation
 - [x] Ultrasonic attenuation histograms
 - [x] Statistics derived from ultrasonic attenuation histograms
-- [ ] Mechanically stronger composite plate identified with justification
+- [x] Mechanically stronger composite plate identified with justification
 

@@ -718,7 +718,7 @@ X、Y典型信号检测结果如上图，正常检测出峰值，两次回波都
     <figcaption>#1403 的判决情况</figcaption>
 </figure>
 
-### c 计算衰减
+### c 衰减图像
 
 > 注：本项目“衰减”一词的数值`ratios`定义为“板的后面的回波（第一次）相对前面（第二次）的幅度”，属于 $[0,1]$。数值越小，衰减越强。
 
@@ -739,9 +739,106 @@ ratios = peaks(2, :) ./ peaks(1, :);
 ratios = reshape(ratios, n_x, n_y, []);
 ```
 
+#### 结果及分析
+
+<figure>
+    <img src="../fig/attenuation_image.jpg">
+    <figcaption>衰减图像</figcaption>
+</figure>
+- 两块板绝大部分的衰减都在 0.3–0.7（蓝色）。
+
+  这符合 $[0,1]$ 的预期。
+
+- 在大部分地方，X比Y更绿，说明衰减更弱。
+
+  因此估计 X 的强度比 Y 高。
+
+- X 较为均匀，各空间位置点的衰减相近；Y 的背景也较均匀，但有一条黄绿直线（大约 $x + y = \SI{30}{mm}$），这条线上衰减非常弱。
+
+  这说明 X 不仅强度高，还很均一；而 Y 在那条线恐怕遭受了机械损伤（可能被压弯过），导致回波反射机理异常。
+
 ## 4 Part Sentencing
+
+### 实现
+
+这次我们又要合并空间维度了。
+
+```matlab
+%% Part sentencing
+% (#x, #y, #plate) → (#space, #plate)
+ratios = reshape(ratios, [], n_plate);
+```
+
+然后在`#space`维统计。
+
+```matlab
+stat = table( ...
+    mean(ratios).', std(ratios).', ...
+    'VariableNames', ["均值" "标准差"], ...
+    'RowNames', ["X" "Y"] ...
+);
+disp(stat);
+```
+
+### 结果及分析
+
+```matlab
+>> main
+          均值       标准差  
+         _______    ________
+
+    X    0.49895     0.04186
+    Y     0.4468    0.068997
+```
+
+<figure>
+    <div style='display: grid; grid-template-columns: repeat(2, auto); gap: 1em;'>
+        <img src="../fig/attenuation_box.jpg">
+        <img src="../fig/attenuation_histogram.jpg">
+    </div>
+    <figcaption>衰减分布</figcaption>
+</figure>
+- X 回波衰减系统性地比 Y 弱（数值整体大约 0.05），故平均机械强度优于 Y。
+- X 回波衰减的空间标准差只有 Y 的 60%，且离群点数量更少、程度更轻，故X整体比Y均一稳定。
+- 由 Attenuation Estimation 的衰减图像，Y 板可能已受损，不宜使用。
+
+综上所述，**<u>X比Y好</u>**。
 
 ## 总结
 
-- 测试不仅帮助事前设计结构、事后验证功能，还有心理上的积极作用。不过 MATLAB 自己的包命名空间与测试框架不太兼容，我反复倒腾了很多次……感觉历史遗留问题浑身。
-- FIR滤波器时延。
+- **测试**不仅帮助事前设计结构、事后验证功能，还有心理上的积极作用。不过 MATLAB 自己的包命名空间与测试框架不太兼容，我反复倒腾了很多次……感觉历史遗留问题浑身。
+- **FIR滤波器**有时延，而且阶数和输入信号点数没关系。
+
+## References
+
+- [Load variables from file into workspace - MATLAB load - MathWorks China](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/load.html?lang=en)
+- [How to create a Matlab module - MATLAB Answers - MATLAB Central](https://ww2.mathworks.cn/matlabcentral/answers/398355-how-to-create-a-matlab-module)
+- [包命名空间 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/matlab_oop/scoping-classes-with-packages.html)
+- [从 Windows 系统提示符启动 MATLAB 程序 - MATLAB - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/ref/matlabwindows.html)
+- [Run MATLAB Script From Command Line | Delft Stack](https://www.delftstack.com/howto/matlab/run-matlab-scripts-from-command-line/)
+- [check if a file exists - MATLAB Answers - MATLAB Central](https://ww2.mathworks.cn/matlabcentral/answers/49414-check-if-a-file-exists)
+- [matlab2tikz/test at master · matlab2tikz/matlab2tikz](https://github.com/matlab2tikz/matlab2tikz/tree/master/test)
+- [删除长度为 1 的维度 - MATLAB squeeze - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/squeeze.html)
+- [Solids and Metals - Speed of Sound](https://www.engineeringtoolbox.com/sound-speed-solids-d_713.html)
+- [快速傅里叶变换 - MATLAB fft - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/fft.html)
+- [私有函数 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/matlab_prog/private-functions.html)
+- [结构体数组 - MATLAB - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/struct.html)
+- [Cutoff Filters - Music Production Knowledge](https://musicproductionknowledge.com/knowledge/spectral-effects/cutoff-filters)
+- [How do you shift elements in a vector in Matlab? – Sage-Answers](https://sage-answers.com/how-do-you-shift-elements-in-a-vector-in-matlab/)
+- [移动最大值 - MATLAB movmax - MathWorks 中国](https://ww2.mathworks.cn/help/matlab/ref/movmax.html)
+- [Butterworth filter design - MATLAB butter - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/signal/ref/butter.html?#bucsfmj)
+- [Frequency response of digital filter - MATLAB freqz - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/signal/ref/freqz.html)
+- [Design digital filters - MATLAB designfilt - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/signal/ref/designfilt.html)
+- [函数参数验证 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/matlab_prog/function-argument-validation-1.html?#mw_1b62b6d6-a445-4c55-a9b9-9c70becfdbe6)
+- [确定输入是否为结构体数组字段 - MATLAB isfield - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/ref/isfield.html?searchHighlight=isfield&s_tid=doc_srchtitle)
+- [Controlling FVTool from the MATLAB Command Line - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/signal/ug/Controlling-FVTool-from-the-command-line.html)
+- [使用 FVTool 进行滤波器分析 - MATLAB & Simulink Example - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/signal/ug/filter-analysis-using-fvtool.html)
+- [Can Matlab's arguments function handle structs - MATLAB Answers - MATLAB Central](https://ww2.mathworks.cn/matlabcentral/answers/520619-can-matlab-s-arguments-function-handle-structs)
+- [Understand Python Function Arguments - MATLAB & Simulink - MathWorks China](https://ww2.mathworks.cn/help/matlab/matlab_external/python-function-arguments.html)
+- [创建常见的二维图 - MATLAB & Simulink Example - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/creating_plots/creating-2-d-plots.html)
+- [数据分布图 - MATLAB & Simulink - MathWorks 中国](https://ww2.mathworks.cn/help/releases/R2020b/matlab/pie-charts-bar-plots-and-histograms.html?s_tid=CRUX_lftnav)
+- [How do I display a Table on Command Window? - MATLAB Answers - MATLAB Central](https://ww2.mathworks.cn/matlabcentral/answers/501363-how-do-i-display-a-table-on-command-window)
+
+---
+
+本项目的代码、文档等存档于[仓库 digital-signal-processing](https://github.com/YDX-2147483647/digital-signal-processing)。不少内容和同学讨论过，万一引发著作权纠纷，请参考我每部分的[提交记录及日期](https://github.com/YDX-2147483647/digital-signal-processing/commits/main)。
