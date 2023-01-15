@@ -559,7 +559,185 @@ center 有整体变形，random 结果难以复现，故后面还是采用 cente
 - 阻带衰减越多，阻带频谱密度越接近零。
 - 通带越宽，保留的回波信号频谱越宽。
 
+## 2.5 Plan B
+
+由 Signal Analysis 背景知识中的分析，**信号在两域集中程度相近，时域略胜一筹**，我怀疑 Marking Scheme 规定时域卷积滤波去噪在此场景不太合适，于是做了些实验。用这套 Plan B 替代上面的 Noise Reduction，也能在下面的 Attenuation Estimation、Part Sentencing 得到类似结果。
+
+Plan B 事实上早于 Noise Reduction 开发，其中的`freq_cut`辅助确定了 Noise Reduction 中的参数，`time_cut`会用于 Attenuation Estimation 检测峰值。
+
+Plan B 毕竟不在 Marking Scheme 中，因此只附在正文之后。
+
 ## 3 Attenuation Estimation
+
+### a 准备工作
+
+之前只针对一个典型信号，现在要针对全部数据了。
+
+1. **读取数据**
+
+   按照 Signal Analysis 中的计划，我们重点研究随时间的变化关系，基本独立分析各个空间位置点。
+
+   为此，我们将其余维度合并为`#slice`，后续去噪、提取峰值等操作只针对`#time`。
+
+   ```matlab
+   %% 读取数据
+   data = util.load_data();
+   
+   n_x = size(data, 1);
+   n_y = size(data, 2);
+   n_time = size(data, 3);
+   n_plate = size(data, 4);
+   
+   % (#x, #y, #time, #plate)
+   % → (#time, #x, #y, #plate)
+   data = permute(data, [3 1 2 4]);
+   % → (#time, #slice)
+   data = reshape(data, n_time, []);
+   ```
+
+   `#slice`是`(#x, #y, #plate)`的线性维度。具体来说，若从零计数，则 x = `#x` × 1mm，y = `#y` × 1mm 处，在X板上是`#x + #y * 40`，在Y板上再加`40 * 20`。后面的编号默认是`#slice`。
+
+2. **Noise reduction**
+
+   `data`备份为`raw_data`，滤波。
+
+   ```matlab
+   %% Noise reduction
+   reducer = noise_reduction.prepare_reducer();
+   raw_data = data;
+   data = filter(reducer, raw_data);
+   ```
+
+### b 峰值检测
+
+#### 原理和实现`+attenuation_estimation/get_peaks.m`
+
+有两段回波，需要分别提取它们的峰值。
+
+1. **切分信号与噪声**
+
+   调用 Plan B 的`time_cut`，根据数据幅度和时间相邻关系切分信号与噪声。原理详见 Plan B 一节。
+
+   <figure>
+       <img src="../fig/Plan_B/cliff-time.jpg" style='max-width: 60%;'>
+       <figcaption>时域切分结果示例</figcaption>
+   </figure>
+
+   ```matlab
+   t = plan_B.time_cut(data, "DurationEstimated", 0.31e-6);
+   ```
+
+   其中 DurationEstimated 在 Signal Analysis 中估计为 0.3 μs，后续看情况手动调整至 0.31 μs。
+
+   `t`的维度与`data`相同，也是`(#time, #slice)`；取值为每一点的类型判断结果，1表示信号，0表示噪声。
+
+   实际这部分在函数`get_peaks`以外。
+
+2. **确定每段回波的边界**
+
+   给`t`在`#time`的首尾各补一零，尺寸增加到`n_time + 2`。
+
+   > 如果不补零，一般也行，只有回波区间在开头或结尾时处理不好，但这种情况只有`time_cut`误判时存在。
+
+   然后**差分**（`diff`），那么
+
+   - 1 代表 0 → 1，即区间左端点`starts`。
+   -  -1 代表 1 → 0，即区间右端点`ends`。
+
+   > `diff`后尺寸缩回`n_time + 1`。
+   >
+   > 由于补零，首位要么 0 → 0 要么 0 → 1，故`diff`结果首位不可能为 -1，因此`ends`取值只有`n_time`种。`starts`同理。
+
+   ```matlab
+   t = diff(cat(1, zeros(1, n_slice), t, zeros(1, n_slice)));
+   % …（其它部分）…
+   
+   for s = 1:n_slice
+       starts = find(t(:, s) == 1);
+       ends = find(t(:, s) == -1) - 1;
+       
+       % …（其它部分）…
+   end
+   ```
+
+3. **记录每段的峰值**
+
+   `peaks(#peak, #slice)`记录每个样本的第一段和最后一段峰值。
+
+   正常来讲只有两段（板有两面嘛）。之所以写`1, end`而非`1, 2`，是为兼容 #1403，详见下。
+
+   ```matlab
+   % …（其它部分）…
+   peaks = zeros(2, n_slice);
+   
+   for s = 1:n_slice
+       % …（其它部分）…
+   
+       for p = 1:2
+           if p == 1
+               range_ = starts(1):ends(1);
+           else
+               range_ = starts(end):ends(end);
+           end
+   
+           peaks(p, s) = max(abs(data(range_, s)));
+       end
+   end
+   ```
+
+#### 单元测试
+
+`get_peaks`也做了单元测试`get_peaks_test.m`。峰值应当正负都算，我开始就忘了，测试才发现。
+
+#### 结果及分析
+
+<figure>
+    <img src="../fig/peaks.jpg" style='max-width: 70%;'>
+    <figcaption>典型信号的峰值检测</figcaption>
+</figure>
+
+
+X、Y典型信号检测结果如上图，正常检测出峰值，两次回波都在相应范围内。
+
+峰值检测需提取两次峰值，基于 Plan B 的`time_cut`。下图随机取了若干点，展示`time_cut`的切分情况，加以验证。上半图展示了这些样本滤波去噪后的时域波形（的绝对值），以及`time_cut`相应 20% 阈值；下半图展示了`time_cut`的切分情况，1 的部分判定为回波。
+
+<figure>
+    <img src="../fig/peak-ordinary.jpg" style='max-width: 80%;'>
+    <figcaption>随机若干点的判决情况</figcaption>
+</figure>
+> 上图中，#1512、#932、#993（蓝、紫、绿）属于Y，#743、#309（红、黄）属于 X。同一块回波的时间相近，不同板则不一定相近。
+
+微调四五次参数后，几乎所有样本都像上面正确识别出两次回波。（即使不调整，40 × 20 × 2 = 1600 个样本中也只有 8 个未能正确切分。）
+
+<img src="../asset/warning-1403.png" style="max-width: 80%;">
+
+唯一的例外是 #1403，如下图，突发噪声太强，错误检出三次回波。虽然 #1403 的突发噪声仍比其两次回波时间短、幅度小，弱于 #1403 的回波，但它比其它某些地方的回波还弱，所以不宜改动`time_cut`的参数。在`get_peaks`中，我只考虑第一段和最后一段，跳过了 #1403 的突发噪声，勉强实现。
+
+<figure>
+    <img src="../fig/peak-1403.jpg" style='max-width: 70%;'>
+    <figcaption>#1403 的判决情况</figcaption>
+</figure>
+
+### c 计算衰减
+
+> 注：本项目“衰减”一词的数值`ratios`定义为“板的后面的回波（第一次）相对前面（第二次）的幅度”，属于 $[0,1]$。数值越小，衰减越强。
+
+#### 原理和实现
+
+归功于向量化、模块化，衰减很容易计算。
+
+```matlab
+%% Attenuation estimation
+peaks = attenuation_estimation.get_peaks(data, t);
+ratios = peaks(2, :) ./ peaks(1, :);
+```
+
+至此，所有计算已完成，可以展开空间维度了。
+
+```matlab
+% (#slice) → (#x, #y, #plate)
+ratios = reshape(ratios, n_x, n_y, []);
+```
 
 ## 4 Part Sentencing
 

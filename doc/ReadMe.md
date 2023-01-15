@@ -1,6 +1,6 @@
 # 报告文档
 
-- `main.md`：提交的文档。
+- [`main.md`](main.md)、[`plan_B.md`](plan_B.md)：提交的文档。
 - 其它`*.md`：实验记录。
 
 ## 导出后

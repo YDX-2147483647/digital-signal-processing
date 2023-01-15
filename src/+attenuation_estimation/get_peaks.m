@@ -6,7 +6,7 @@ function peaks = get_peaks(data, t)
 % - t(#time, #slice)：每一点的类型，1表示信号，0表示噪声
 %
 % 输出：
-% - peaks(#peak, #slice)：每个样本的前两次峰值
+% - peaks(#peak, #slice)：每个样本的第一段和最后一段峰值
 
 arguments
     data(:, :)
