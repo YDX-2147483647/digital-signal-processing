@@ -18,11 +18,11 @@
 
 - `asset/`：截图等附件
 
-- `data/`：数据
+- [`data/`](https://github.com/YDX-2147483647/digital-signal-processing/releases/download/final/data.zip)：数据
 
 - `doc/`：文档，documentation
 
-- `fig/`：图象，figures
+- [`fig/`](https://github.com/YDX-2147483647/digital-signal-processing/releases/download/final/fig.zip)：图象，figures
 
   可由`src/`中程序生成。
 
