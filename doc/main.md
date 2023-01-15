@@ -417,6 +417,148 @@ center 有整体变形，random 结果难以复现，故后面还是采用 cente
 
 ## 2 Noise Reduction
 
+### 背景知识
+
+- **滤波器**
+
+  滤波器是一种线性时不变（linear time-invariant, LTI）系统。输出信号等于属于信号与其单位冲激响应的卷积。由于信号与噪声的频谱范围不同，设计适当的频率响应，可以抑制噪声。
+
+- **FIR 滤波器**
+
+  数字滤波器的单位冲激响应如果有限长，则称为 FIR（finite impulse response）滤波器。
+
+  与 IIR（infinite impulse response）滤波器相比，FIR滤波器不存在稳定性问题，可用对称性保证相位线性，但满足相同幅度特性需要的阶数更多。
+
+### a 滤波器特性
+
+#### 设计
+
+1. **选择类型**
+
+   要求：
+
+   - 本项目采集数据后统一处理，只关心板的强度，无需实时。
+   - 考查强度后续需测量峰值。信号肯定不完全单频，一点点相位差都会影响峰值，对数据可靠性要求太高。因此最好群时延与频率无关。
+
+   决策：采用能严格线性相位的 **<u>FIR</u>** 滤波器。它虽然阶数高，计算量大，时延大，但在本项目都不是问题。
+
+2. **指标**
+
+   <figure>
+       <img src="../fig/freq-center-detail.jpg" style='max-width: 60%;'>
+       <figcaption>典型信号的幅度谱<br>此为局部，完整图见前一节。</figcaption>
+   </figure>
+
+   - 信号集中在 3–8 MHz，希望保留这部分。
+   - 数据有直流分量。如果数据代表空气密度，那么直流分量没有意义，还影响后续峰值测量，应当去除。
+   - 低频、高频主要是噪声，可以去除。
+
+   计划设计**<u>带通</u>**滤波器。通带范围 3–8 MHz，波纹尽可能小；阻带要求不高，有就可以，具体截止频率、衰减之后看情况确定。最后采用的指标如下。
+
+   - 通带：3–8 MHz 内，波纹 1dB。
+   - 阻带：2 MHz、15 MHz 以外，衰减高于 13 dB。
+
+3. **设计方法**
+
+   我本来想手动设计滤波器，采用频域取样法，但因为细节太多：过渡带设计、阶数导致的频率以及线性相位问题、……最终未能完成，只好采用`designfilt`自动设计。
+
+   ```matlab
+   reducer = designfilt( ...
+       'bandpassfir', ...
+       'SampleRate', 100, ...
+       'StopbandFrequency1', 2, 'StopbandAttenuation1', 13, ...
+       'PassbandFrequency1', 3, 'PassbandFrequency2', 8, 'PassbandRipple', 1, ...
+       'StopbandFrequency2', 15, 'StopbandAttenuation2', 13, ...
+       'DesignMethod', 'equiripple' ...
+   );
+   ```
+
+   我采用等波纹设计方法，它允许带通滤波器（有些方法只支持低通、高通等），采用 Parks-McClellan 算法。这种滤波器的波纹相等：每次波纹几乎都取到极限要求，比如整个阻带频率响应的振荡几乎和频率无关，因为针对所有振荡中的最大的优化。
+
+#### 结果及分析
+
+符合以上要求的 FIR 带通滤波器有 71 阶。系数太多，就不在此列出了。
+
+<figure>
+    <img src="../fig/noise_reduction-reducer.jpg" style="max-width: 80%;">
+    <figcaption>滤波器的频率响应<br>以上只是幅度响应；相位响应线性，不必画出。</figcaption>
+</figure>
+
+滤波器频率响应如上图。
+
+- 橙色虚线是指标的边界，通带、阻带都在区间内，符合标准。（过渡带部分区域衰减超过要求，也符合指标。）
+- 通带波纹、阻带振荡几乎取到边界，且分别相等，正是“等波纹”。
+
+### b 去噪效果
+
+<figure>
+    <img src="../fig/noise_reduction-result-time.jpg" style="max-width: 80%;">
+    <figcaption>滤波前后数据</figcaption>
+</figure>
+
+
+- 回波**信号**振幅、相对位置几乎不变。
+
+  滤波器保留了回波信号的大部分频谱，应当不受影响。
+
+- **噪声**幅度普遍减弱，剩余部分的频率与信号接近。
+
+  噪声在信号以外的频谱受抑制，总功率降低；与信号频率接近的噪声几乎未处理，故主要剩余这部分。
+
+- 整体存在明显**延时**，约 0.3 μs。
+
+  FIR 滤波器线性相位，71 阶，群时延为 (71-1) / 2 / 100 MHz = 0.35 μs，与图象一致。
+
+<figure>
+    <img src="../fig/noise_reduction-result-freq.jpg" style="max-width: 80%;">
+    <figcaption>滤波前后数据的幅度谱</figcaption>
+</figure>
+
+- **直流分量**消失。
+
+- **阻带**明显被抑制，但存在小波纹。波纹振幅基本与频率无关，周期约为 2 MHz。
+
+  阻带基本是白噪声，频谱密度与频率无关。时域卷积相当于频域相乘，白噪声频谱与滤波器频率响应相乘，即为滤波后的频谱。
+
+- **通带**基本不变，信号的频谱被断崖式截断。
+
+  信号频谱范围原本很广，滤波器主要保留了 $\sinc$ 的主峰。
+
+### c 滤波器截止频率和阶数的影响
+
+随便改变通带截止频率和阶数看看，与之前不同的参数如下表。
+
+| 序号 | 通带范围 | 阶数 | 阻带衰减 |
+| ---: | :------: | :--: | :------: |
+|    1 | 3–8 MHz  |  71  |  13 dB   |
+|    2 | 3–8 MHz  |  88  |  20 dB   |
+|    3 | 4–7 MHz  |  52  |  20 dB   |
+
+<figure>
+    <img src="../fig/noise_reduction-variants-reducer.jpg" style="max-width: 80%;">
+    <figcaption>滤波器的频率响应</figcaption>
+</figure>
+
+- 通带截止频率决定通带边界。
+- 阻带振荡与阶数负相关，与通带宽度正相关。（阻带振荡与阻带衰减负相关）
+- 通带越窄，通带内的振荡次数越少。
+
+<figure>
+    <img src="../fig/noise_reduction-variants-result-time.jpg">
+    <figcaption>滤波后数据</figcaption>
+</figure>
+
+- 群时延和阶数正相关。
+- 在这个范围内，各种参数组合在时域效果相近。
+
+<figure>
+    <img src="../fig/noise_reduction-variants-result-freq.jpg">
+    <figcaption>滤波后数据的幅度谱</figcaption>
+</figure>
+
+- 阻带衰减越多，阻带频谱密度越接近零。
+- 通带越宽，保留的回波信号频谱越宽。
+
 ## 3 Attenuation Estimation
 
 ## 4 Part Sentencing
@@ -424,3 +566,4 @@ center 有整体变形，random 结果难以复现，故后面还是采用 cente
 ## 总结
 
 - 测试不仅帮助事前设计结构、事后验证功能，还有心理上的积极作用。不过 MATLAB 自己的包命名空间与测试框架不太兼容，我反复倒腾了很多次……感觉历史遗留问题浑身。
+- FIR滤波器时延。

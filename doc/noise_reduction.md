@@ -12,7 +12,7 @@
 
 ![](../fig/noise_reduction-reducer.jpg)
 
-![](../fig/noise_reduction-result.jpg)
+![](../fig/noise_reduction-result-time.jpg)
 
 ## References
 

@@ -80,12 +80,12 @@ Ultrasonic signals are **noisy** in nature due to the back scattering phenomenon
 
 With the ultrasonic measurement operating at a particular frequency band, the second step is to implement a suitable **digital filtering system** to reduce the impact of out-of-band **noise** on ultrasonic echoes, and to demonstrate the effectiveness of the filter by comparing the output with respect to input in the time and frequency domains. A good filter should yield an output signal that is as similar to the original signal as possible in the **two ultrasonic echo intervals** (with minimum amplitude distortion) and as near to zero as possible outside the two ultrasonic echo intervals.
 
-- [ ] Program with comments to yield filter coefficients and filtered signal
-- [ ] Filter frequency response produced with correct scale
-- [ ] Filtered signal produced with correct scale
-- [ ] Magnitude frequency spectrum of filtered signal
-- [ ] Comments on output with respect to input in time and frequency domains
-- [ ] Effects of cut-off frequency and filter order on filtered signal
+- [x] Program with comments to yield filter coefficients and filtered signal
+- [x] Filter frequency response produced with correct scale
+- [x] Filtered signal produced with correct scale
+- [x] Magnitude frequency spectrum of filtered signal
+- [x] Comments on output with respect to input in time and frequency domains
+- [x] Effects of cut-off frequency and filter order on filtered signal
 
 ### Attenuation estimation
 

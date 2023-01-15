@@ -228,7 +228,7 @@ if options.Force || ~isfile("../fig/noise_reduction-reducer.jpg")
 
     title("滤波器幅频响应");
     xlabel("$f$ / MHz", "Interpreter", "latex");
-    ylabel("幅度 / dB");
+    ylabel("幅度");
 
     f.Position = [1 1 1280 540]; % 不然横轴标签会溢出
     exportgraphics(gcf, "../fig/noise_reduction-reducer.jpg");
@@ -236,7 +236,7 @@ end
 
 typical_reduced_time = filter(reducer, typical_time);
 
-if options.Force || ~isfile("../fig/noise_reduction-result.jpg")
+if options.Force || ~isfile("../fig/noise_reduction-result-time.jpg")
     fig = figure;
 
     subplot(2, 1, 1);
@@ -248,7 +248,84 @@ if options.Force || ~isfile("../fig/noise_reduction-result.jpg")
     ylabel("处理后");
 
     title("滤波去噪结果");
-    exportgraphics(fig, "../fig/noise_reduction-result.jpg");
+    exportgraphics(fig, "../fig/noise_reduction-result-time.jpg");
+end
+
+if options.Force || ~isfile("../fig/noise_reduction-result-freq.jpg")
+    fig = figure;
+
+    subplot(2, 1, 1);
+    plot_freq(abs(fft(typical_time)));
+    ylabel("原始");
+
+    subplot(2, 1, 2);
+    plot_freq(abs(fft(typical_reduced_time)));
+    ylabel("处理后");
+
+    title("滤波去噪结果的幅度谱");
+    exportgraphics(fig, "../fig/noise_reduction-result-freq.jpg");
+end
+
+if options.Force || ~all(isfile("../fig/noise_reduction-variants-" + ["reducer", "result-time", "result-freq"] + ".jpg"))
+    %% Calculate
+    reducers = [
+                reducer
+                designfilt( ...
+                    'bandpassfir', ...
+                    'SampleRate', 100, ...
+                    'StopbandFrequency1', 2, 'StopbandAttenuation1', 13, ...
+                    'PassbandFrequency1', 3, 'PassbandFrequency2', 8, 'PassbandRipple', 1, ...
+                    'StopbandFrequency2', 20, 'StopbandAttenuation2', 20, ...
+                    'DesignMethod', 'equiripple' ...
+                )
+                designfilt( ...
+                    'bandpassfir', ...
+                    'SampleRate', 100, ...
+                    'StopbandFrequency1', 2, 'StopbandAttenuation1', 13, ...
+                    'PassbandFrequency1', 4, 'PassbandFrequency2', 7, 'PassbandRipple', 1, ...
+                    'StopbandFrequency2', 20, 'StopbandAttenuation2', 20, ...
+                    'DesignMethod', 'equiripple' ...
+                )
+                ];
+    orders = arrayfun(@(r) length(r.Coefficients), reducers).';
+    names = string(orders) + "阶，" + ["3–8" "3–8" "4–7"] + "MHz";
+
+    reduced_time = arrayfun(@(r) filter(r, typical_time), reducers, 'UniformOutput', false);
+    reduced_freq = cellfun(@(r_t) fft(r_t), reduced_time, 'UniformOutput', false);
+
+    %% reducer
+    f = fvtool(reducers(1), reducers(2), reducers(3));
+    f.MagnitudeDisplay = "Magnitude";
+    legend(names);
+    title("滤波器幅频响应");
+    xlabel("$f$ / MHz", "Interpreter", "latex");
+    ylabel("幅度");
+
+    exportgraphics(gcf, "../fig/noise_reduction-variants-reducer.jpg");
+
+    %% result-time
+    figure("WindowState", "maximized");
+    tiledlayout(3, 1);
+
+    for r = 1:3
+        nexttile;
+        plot_time(reduced_time{r});
+        title(names(r));
+    end
+
+    exportgraphics(gcf, "../fig/noise_reduction-variants-result-time.jpg");
+
+    %% result-freq
+    figure("WindowState", "maximized");
+    tiledlayout(3, 1);
+
+    for r = 1:3
+        nexttile;
+        plot_freq(abs(reduced_freq{r}));
+        title(names(r));
+    end
+
+    exportgraphics(gcf, "../fig/noise_reduction-variants-result-freq.jpg");
 end
 
 typical_time = typical_reduced_time;
